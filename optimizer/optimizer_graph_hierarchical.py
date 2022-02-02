@@ -238,7 +238,7 @@ def main(all_num_machines, profile_filename, network_bandwidths, memory_size,
         states[i].parameter_size = 0.0
         for predecessor in all_predecessors:
             states[i].compute_time += ((predecessor.forward_compute_time +
-                                        predecessor.backward_compute_time) / 1000.0) / 1.0
+                                        predecessor.backward_compute_time) / 1000.0) / 1.00
             states[i].activation_size += predecessor.activation_size
             states[i].parameter_size += predecessor.parameter_size
     gr.reset()
