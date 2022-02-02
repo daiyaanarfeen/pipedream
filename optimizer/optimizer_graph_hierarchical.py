@@ -238,7 +238,7 @@ def main(all_num_machines, profile_filename, network_bandwidths, memory_size,
         states[i].parameter_size = 0.0
         for predecessor in all_predecessors:
             states[i].compute_time += ((predecessor.forward_compute_time +
-                                        predecessor.backward_compute_time) / 1000.0)
+                                        predecessor.backward_compute_time) / 1000.0) / 1.0
             states[i].activation_size += predecessor.activation_size
             states[i].parameter_size += predecessor.parameter_size
     gr.reset()
@@ -371,7 +371,8 @@ def main(all_num_machines, profile_filename, network_bandwidths, memory_size,
               "machine:" % dp_str, total_time / data_parallel_total_time)
         print("Throughput increase (compared to (%s)-machine DP):" % dp_str,
               data_parallel_total_time / pipeline_parallel_total_time)
-    return pipeline_parallel_total_time, data_parallel_total_time
+    # return pipeline_parallel_total_time, data_parallel_total_time
+    return all_As, parameter_sizes
 
 
 if __name__ == '__main__':
@@ -411,7 +412,7 @@ if __name__ == '__main__':
     use_fewer_machines = args["use_fewer_machines"]
     activation_compression_ratio = args["activation_compression_ratio"]
 
-    main(all_num_machines, profile_filename, network_bandwidths, memory_size,
+    all_As, parameter_sizes = main(all_num_machines, profile_filename, network_bandwidths, memory_size,
          straight_pipeline, use_memory_constraint, use_fewer_machines,
          activation_compression_ratio, output_directory,
          verbose=True)
