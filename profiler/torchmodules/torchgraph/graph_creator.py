@@ -134,7 +134,7 @@ class TensorWrapper:
             activation_size = self.node().activation_size[key]
         except:
             activation_size = self.node().activation_size
-        wrapped_result = TensorWrapper(result_tensor, "__getitem__(%s)" % key, self.graph_creator,
+        wrapped_result = TensorWrapper(result_tensor, "__getitem__(%s)" % str(key), self.graph_creator,
                                        activation_size=activation_size)
         self.graph_creator.graph.add_edge(self._node, wrapped_result.node())
         return wrapped_result
@@ -179,6 +179,29 @@ def cat(wrapped_tensors, dim):
         if not isinstance(wrapped_tensor, TensorWrapper):
             wrapped_tensor = TensorWrapper(wrapped_tensor, "Input", graph_creator)
         graph_creator.graph.add_edge(wrapped_tensor.node(), wrapped_result.node())
+    return wrapped_result
+
+
+def bmm(a, b):
+    if not isinstance(a, TensorWrapper):
+        graph_creator = b.graph_creator
+        wrapped_a = TensorWrapper(a, "Input", graph_creator)
+        wrapped_b = b
+        activation_sizes = [wrapped_b.node().activation_size]
+    elif not isinstance(b, TensorWrapper):
+        graph_creator = a.graph_creator
+        wrapped_b = TensorWrapper(b, "Input", graph_creator)
+        wrapped_a = a
+        activation_sizes = [wrapped_a.node().activation_size]
+    else:
+        graph_creator = a.graph_creator
+        wrapped_a, wrapped_b = a, b
+        activation_sizes = [wrapped_a.node().activation_size, wrapped_b.node().activation_size]
+    result = torch.bmm(wrapped_a.tensor, wrapped_b.tensor)
+    wrapped_result = TensorWrapper(result, "bmm(%d, %d, %d)" %(wrapped_a.shape[0], wrapped_a.shape[1], wrapped_b.shape[1]), 
+                                  graph_creator, activation_size=activation_sizes[0])
+    graph_creator.graph.add_edge(wrapped_a.node(), wrapped_result.node())
+    graph_creator.graph.add_edge(wrapped_b.node(), wrapped_result.node())
     return wrapped_result
 
 
