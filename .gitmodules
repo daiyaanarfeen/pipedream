@@ -1,0 +1,3 @@
+[submodule "profiler/dlrm"]
+	path = profiler/dlrm
+	url = git@github.com:daiyaanarfeen/dlrm.git
