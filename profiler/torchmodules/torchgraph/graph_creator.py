@@ -15,9 +15,10 @@ import graph
 
 object_id = 0
 
-class TensorWrapper(object):
+class TensorWrapper:
     def __init__(self, tensor, node_desc, graph_creator, activation_size=None):
         self.tensor = tensor
+        self.shape = self.tensor.shape
         global object_id
         self.object_id = object_id
         object_id += 1
