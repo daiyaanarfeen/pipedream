@@ -13,9 +13,13 @@ except:
     pass
 
 gr = graph.Graph.from_str(open('gnmt_partitioned/gpus=12.txt', 'r').read())
-id2stage = {}
-for id, node in gr.nodes.items():
-    id2stage[id] = node.stage_id
+stage2nodes = {}
+for i in range(12):
+    nodes = []
+    for k, v in gr.nodes.items():
+            if v.stage_id == i:
+                    nodes.append((k, v))
+    stage2nodes[i] = nodes
 
 def compute_time(k, j, speed, m_prime=1, bandwidth=3125000000.0):
     last_stage_time = compute_times[k+1][j]
