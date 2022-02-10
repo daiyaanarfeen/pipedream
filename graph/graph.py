@@ -482,9 +482,9 @@ class Graph(object):
     def to_dot(self, arch):
         dot = graphviz.Digraph()
         for node in self.nodes.values():
-            node_desc = "%s\n[forward_compute_time=%.3f,backward_compute_time=%.3f,activation_size=%s,parameter_size=%.1f]" % (
+            node_desc = "%s\n[forward_compute_time=%.3f,backward_compute_time=%.3f,activation_size=%s,parameter_size=%.1f,node_id=%s]" % (
                 node.node_desc, node.forward_compute_time, node.backward_compute_time,
-                node.activation_size, node.parameter_size)
+                node.activation_size, node.parameter_size, node.node_id[4:])
             if node.stage_id is not None:
                 color = self._colors[node.stage_id % len(self._colors)]
                 dot.node(node.node_id, node_desc,
