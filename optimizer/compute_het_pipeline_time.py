@@ -5,14 +5,12 @@ import graph
 try:
     A = json.load(open('A.json', 'r'))
     compute_times = json.load(open('compute_times.json', 'r'))
-    for i in range(len(compute_times)):
-        for j in range(len(compute_times[0])):
-            compute_times[i][j] = compute_times[i][j][-1][0]
     parameter_sizes = json.load(open('parameter_sizes.json', 'r'))
+    activation_sizes = json.load(open('activation_sizes.json', 'r')) 
 except:
     pass
 
-gr = graph.Graph.from_str(open('gnmt_partitioned/gpus=12.txt', 'r').read())
+gr = graph.Graph.from_str(open('gnmt/gpus=12.txt', 'r').read())
 stage2nodes = {}
 for i in range(12):
     nodes = []
@@ -21,12 +19,28 @@ for i in range(12):
                     nodes.append((k, v))
     stage2nodes[i] = nodes
 
-def compute_time(k, j, speed, m_prime=1, bandwidth=3125000000.0):
-    last_stage_time = compute_times[k+1][j]
-    last_stage_parameter_size = parameter_sizes[k+1][j]
-    last_stage_time = sum([last_stage_time,
-    ((4 * (m_prime - 1) *
-        last_stage_parameter_size) / (bandwidth * m_prime))])   
-    last_stage_time /= m_prime
-    last_stage_time /= speed
-    return last_stage_time
+cur_end = len(A) - 2
+super_stage_splits = [cur_end]
+cur_machines_left = len(A[0][cur_end]) - 1
+while True:
+    if A[0][cur_end][cur_machines_left][1] is None:
+        break
+    cur_end = A[0][cur_end][cur_machines_left][1][0]
+    super_stage_splits.insert(0, cur_end)
+    cur_machines_left = A[0][cur_end][cur_machines_left][1][1] 
+super_stage_splits.insert(0, 0)
+
+sub_stage_splits = []
+for i in range(len(super_stage_splits)-1):
+    beg = super_stage_splits[i]
+    cur_end = super_stage_splits[i+1] 
+    cur_stage_splits = [cur_end]
+    cur_machines_left = len(compute_times[beg][cur_end]) - 1
+    while True:
+        if compute_times[beg][cur_end][cur_machines_left][1] is None:
+            break
+        cur_end = compute_times[beg][cur_end][cur_machines_left][1][0]
+        cur_stage_splits.insert(0, cur_end)
+        cur_machines_left = compute_times[beg][cur_end][cur_machines_left][1][1]
+    cur_stage_splits.insert(0, beg)
+    sub_stage_splits.append(cur_stage_splits)
