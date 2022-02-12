@@ -8,6 +8,7 @@ from collections import OrderedDict
 import csv
 import math
 import os
+import pickle
 
 import sys
 sys.path.append("..")
@@ -372,7 +373,7 @@ def main(all_num_machines, profile_filename, network_bandwidths, memory_size,
         print("Throughput increase (compared to (%s)-machine DP):" % dp_str,
               data_parallel_total_time / pipeline_parallel_total_time)
     # return pipeline_parallel_total_time, data_parallel_total_time
-    return all_As, parameter_sizes, activation_sizes
+    return all_As, parameter_sizes, output_activation_sizes, states, antichain_gr
 
 
 if __name__ == '__main__':
@@ -412,7 +413,13 @@ if __name__ == '__main__':
     use_fewer_machines = args["use_fewer_machines"]
     activation_compression_ratio = args["activation_compression_ratio"]
 
-    all_As, parameter_sizes, activation_sizes = main(all_num_machines, profile_filename, network_bandwidths, memory_size,
+    all_As, parameter_sizes, activation_sizes, antichain_nodes, antichain_gr = main(all_num_machines, profile_filename, network_bandwidths, memory_size,
          straight_pipeline, use_memory_constraint, use_fewer_machines,
          activation_compression_ratio, output_directory,
          verbose=True)
+
+    pickle.dump(all_As, open('%s/all_As.pkl'%output_directory, 'wb'))
+    pickle.dump(parameter_sizes, open('%s/param_sizes.pkl'%output_directory, 'wb'))
+    pickle.dump(activation_sizes, open('%s/act_sizes.pkl'%output_directory, 'wb'))
+    pickle.dump(antichain_nodes, open('%s/antichain_nodes.pkl'%output_directory, 'wb'))
+    pickle.dump(antichain_gr, open('%s/antichain_gr.pkl'%output_directory, 'wb'))
